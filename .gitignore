@@ -1,0 +1,3 @@
+commande/node_modules
+mysql/data
+.env.*
