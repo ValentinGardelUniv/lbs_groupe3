@@ -1,6 +1,9 @@
 version: "3"
 
 services:
+  ##################
+  ## API COMMANDE ##
+  ##################
   commande:
     image: node
     ports:
@@ -25,7 +28,43 @@ services:
   adminer:
     image: adminer
     ports:
-      - "3001:8080"
+      - "4001:8080"
     restart: always
     links:
       - mysql
+  ###################
+  ## API CATALOGUE ##
+  ###################
+  catalogue:
+    image: node
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./catalogue/.env.dev
+    volumes:
+      - ./catalogue:/usr/src/app
+    working_dir: /usr/src/app
+    #command: npm start
+    #command: bash -c 'npm -i && npm start'
+    command: bash -c 'npm i && npm run dev'
+    links:
+      - mongo
+  mongo:
+    image: mongo
+    env_file:
+      - ./mongo/.env.dev
+    volumes:
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./mongo/data:/data/db
+      - ./mongo/logs:/var/log/mongodb
+      - ./mongo/schema:/var/schema
+    working_dir: /var/schema
+    command: [--auth]
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "4002:8081"
+    env_file:
+      - ./mongo-express/.env.dev
+    links:
+      - mongo

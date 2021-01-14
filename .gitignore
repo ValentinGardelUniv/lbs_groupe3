@@ -1,3 +1,10 @@
+catalogue/node_modules
+catalogue/package-lock.json
 commande/node_modules
+commande/package-lock.json
+mongo/data
+mongo/logs
+mongo/init-mongo.js
 mysql/data
+
 .env.*
