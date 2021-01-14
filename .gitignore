@@ -27,6 +27,7 @@ node_modules/
 *.ini
 test.js
 mysqldata
+.env.dev
 
 # External tool builders
 .externalToolBuilders/
