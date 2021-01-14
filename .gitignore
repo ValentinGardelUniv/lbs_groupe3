@@ -72,3 +72,6 @@ mysqldata
 .cache-main
 .scala_dependencies
 .worksheet
+
+# Database
+mysql_data/

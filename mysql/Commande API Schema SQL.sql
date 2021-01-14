@@ -7,22 +7,21 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 DROP TABLE IF EXISTS `client`;
 CREATE TABLE `client` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `nom_client` varchar(128) NOT NULL,
   `mail_client` varchar(256) NOT NULL,
   `passwd` varchar(256) NOT NULL,
   `cumul_achats` decimal(8,2) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `commande`;
 CREATE TABLE `commande` (
-  `id` varchar(128) NOT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `id` varchar(128) PRIMARY KEY,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `livraison` datetime NOT NULL,
   `nom` varchar(128) NOT NULL,
   `mail` varchar(256) NOT NULL,
