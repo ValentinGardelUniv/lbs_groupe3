@@ -28,7 +28,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - "4001:8080"
+      - "4000:8080"
     restart: always
     links:
       - mysql
@@ -63,7 +63,7 @@ services:
   mongo-express:
     image: mongo-express
     ports:
-      - "4002:8081"
+      - "4001:8081"
     env_file:
       - ./mongo-express/.env.dev
     links:

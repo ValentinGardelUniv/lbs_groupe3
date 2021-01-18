@@ -4,7 +4,7 @@ mongoose.connect("mongodb://" + process.env.MONGO_USER + ":" + process.env.MONGO
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
-    console.log(`Connection to DB "${process.env.MONGO_DATABASE}"...`);
+    console.log(`Connection to DB ${process.env.MONGO_DATABASE}...`);
 });
 
 module.exports = mongoose;
