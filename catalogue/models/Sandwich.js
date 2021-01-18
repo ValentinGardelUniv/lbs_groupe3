@@ -15,10 +15,8 @@ const schema = new mongoose.Schema({
         taille: { type: Number, required: true },
         filename: { type: String, required: true }
     }),
-    categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Categorie", required: false, default: [] }],
-    prix: new mongoose.Schema({
-        $numberDecimal: mongoose.Decimal128
-    })
+    categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Categorie", required: true, default: [] }],
+    prix: { type: mongoose.Schema.Types.Decimal128, required: true }
 });
 
 module.exports = mongoose.model("Sandwich", schema, "sandwichs");
