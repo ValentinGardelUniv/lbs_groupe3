@@ -26,12 +26,12 @@ function mapSandwiches(sandwiches, count, host, page, size, category){
      };
      if(page!=undefined){
         /** last page if pagination ON */
-         let lastPage=count/size;
+         let lastPage=Math.ceil(count/size);
          result.links = {
-            next: {href:host+"/sandwiches/?page="+((page+1>lastPage)?lastPage:page+1)+"&size="+size+"&t="+category},
-            prev: {href:host+"/sandwiches/?page="+((page-1<1)?1:page-1)+"&size="+size+"&t="+category},
-            last: {href:host+"/sandwiches/?page="+lastPage+"&size="+size+"&t="+category},
-            first: {href:host+"/sandwiches/?page=1&size="+size+"&t="+category}
+            next: {href:host+"/sandwiches/?page="+((page+1>lastPage)?lastPage:page+1)+"&size="+size+(category)?"&t="+category:""},
+            prev: {href:host+"/sandwiches/?page="+((page-1<1)?1:page-1)+"&size="+size+(category)?"&t="+category:""},
+            last: {href:host+"/sandwiches/?page="+lastPage+"&size="+size+(category)?"&t="+category:""},
+            first: {href:host+"/sandwiches/?page=1&size="+size+(category)?"&t="+category:""}
          };
      }
    return result;
@@ -63,7 +63,7 @@ async function getSandwiches(host, category, page, size=2){
 
 
    if(sandwiches){
-      sandwiches=mapSandwiches(sandwiches, count, host, page, size, category);
+      return mapSandwiches(sandwiches, count, host, page, size, category);
    }
    else
       return false;
