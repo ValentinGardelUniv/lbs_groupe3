@@ -5,6 +5,7 @@ const router = express.Router();
 const handler404 = require("../utils/handler404");
 const handler405 = require("../utils/handler405");
 const Sandwich = require("../models/Sandwich");
+const Categorie = require("../models/Categorie");
 
 router.get('/', async (req, res, next) => {
     let sandwichs = [];
@@ -22,6 +23,8 @@ router.get('/', async (req, res, next) => {
             let sandwichsprepares = [];
             sandwichs.forEach((sandwich) => {
                 if (req.query.t && sandwich.type_pain !== req.query.t)
+                    return;
+                if (req.query.c && !sandwich.categories.includes(req.query.c))
                     return;
                 sandwichsprepares.push({
                     sandwich: {
@@ -97,6 +100,44 @@ router.get('/', async (req, res, next) => {
             });
         }
         return handler404(res);
+    } catch (err) {
+        next(500);
+    }
+}).all(handler405);
+
+router.get('/:ref', async (req, res, next) => {
+    let sandwich = [];
+    try {
+        sandwich = await Sandwich.findOne({
+            ref: req.params.ref
+        });
+        if (sandwich) {
+            categories = await Categorie.find({
+                nom: sandwich.categories
+            });
+            if (categories)
+                categories.forEach((categorie, clecategorie) => {
+                    sandwich.categories[clecategorie] = {
+                        id: categorie.id,
+                        nom: categorie.nom
+                    };
+                });
+            return res.json({
+                type: "resource",
+                links: {
+                    self: {
+                        href: "/sandwichs/"+req.params.ref
+                    }
+                },
+                sandwich: {
+                    ref: sandwich.ref,
+                    nom: sandwich.nom,
+                    description: sandwich.description,
+                    type_pain: sandwich.type_pain,
+                    categories: sandwich.categories
+                }
+            });
+        }
     } catch (err) {
         next(500);
     }
