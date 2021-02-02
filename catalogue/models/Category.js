@@ -5,7 +5,7 @@ const schema = new mongoose.Schema({
     nom: { type: String, required: true },
     description: { type: String, text: true }
 });
-let ex = mongoose.model("Category", schema);
+/*
 ex.toJson= (category)=>{
     return {
     type: "resource",
@@ -20,6 +20,6 @@ ex.toJson= (category)=>{
        }
     }
  };
-};
+};*/
 
-module.exports = ex;
+module.exports = mongoose.model("Category", schema);

@@ -1,11 +1,28 @@
 const express = require('express');
+const Category = require('../models/Category.js');
 const router = express.Router();
 
 const Sandwich=require('../models/Sandwich.js');
 
 function mapSandwichs(sandwichs, count, page, size, category){
    sandwichs = sandwichs.map(sandwich=>{
-      return sandwich.toJson();
+      return {
+         sandwich: {
+            ref: sandwich.ref,
+            nom: sandwich.nom,
+            type_pain: sandwich.type_pain,
+            prix: sandwich.prix,
+            categories: sandwich.categories
+         },
+         links:{
+               self: {
+                  href:"/sandwichs/"+sandwich.ref
+               },
+               categories: {
+                  href: "/sandwichs/"+sandwich.ref+"/categories"
+               }
+         }
+      };
    });
    let result = {
       type: "collection",
@@ -59,15 +76,6 @@ async function getSandwichs(category, page, size=2){
       return false;
 }
 
-async function getSandwich(ref){
-   let sandwich = await Sandwich.where("ref="+ref);
-   if(sandwich){
-      return sandwich;
-   }
-   else
-      return false;
-}
-
 router.get('/', async (req, res)=>{
     let sandwichs=await getSandwichs(req.query.t, req.query.page, req.query.size);
     if(sandwichs){
@@ -78,9 +86,64 @@ router.get('/', async (req, res)=>{
 });
 
 router.get('/:ref', async (req, res)=>{
-   let sandwich=await getSandwich(req.params.ref);
+   let sandwich=await Sandwich.findOne({ref:req.params.ref});
+
+   if(sandwich){
+      return res.status(200).json({
+      type: "resource",
+      sandwich: {
+         ref: sandwich.ref,
+         nom: sandwich.nom,
+         type_pain: sandwich.type_pain,
+         prix: sandwich.prix
+      },
+      links:{
+            self: {
+               href:"/sandwichs/"+sandwich.ref
+            },
+            categories: {
+               href: "/sandwichs/"+sandwich.ref+"/categories"
+            }
+         }
+      });
+   }
+   else
+      res.status(404).send("Not Found");
+});
+
+router.get('/:ref/categories', async (req, res)=>{
+   let sandwich=await Sandwich.findOne({ref:req.params.ref});
     if(sandwich){
-       return res.status(200).json(sandwich.toJson());
+       let categories = await Category.find({nom: sandwich.categories});
+       return res.status(200).json({
+         type: "resource",
+         sandwich: {
+            ref: sandwich.ref,
+            nom: sandwich.nom,
+            type_pain: sandwich.type_pain,
+            prix: sandwich.prix,
+            categories: categories.map((category)=>{
+               return {
+                  category: {
+                     id: category.id,
+                     nom: category.nom,
+                     description: category.description
+                  },
+                  links: {
+                     self: {href: "/categories/"+category.id}
+                  }
+               };
+            })
+         },
+         links:{
+               self: {
+                  href:"/sandwichs/"+sandwich.ref
+               },
+               categories: {
+                  href: "/sandwichs/"+sandwich.ref+"/categories"
+               }
+            }
+         });
     }
     else
       res.status(404).send("Not Found");

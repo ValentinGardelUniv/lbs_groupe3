@@ -39,7 +39,6 @@ services:
   adminer.commande:
     container_name: adminer.commande
     image: adminer
-    restart: always
     ports:
       - 8080:8080
     networks:
