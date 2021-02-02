@@ -24,7 +24,7 @@ router.get("/", async (req, res, next) => {
                     }
                 })
             });
-    return handler404(res);
+        return handler404(res);
     } catch(err) {
         next(500);
     }
