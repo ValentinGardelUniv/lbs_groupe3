@@ -14,7 +14,7 @@ const error_404_handler=require('./middlewares/error_404_handler.js');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/sandwiches', sandwichesRouter);
+app.use('/sandwichs', sandwichesRouter);
 app.use('/categories', categoriesRouter);
 
 //app.use(error_404_handler);

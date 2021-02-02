@@ -5,5 +5,21 @@ const schema = new mongoose.Schema({
     nom: { type: String, required: true },
     description: { type: String, text: true }
 });
+let ex = mongoose.model("Category", schema);
+ex.toJson= (category)=>{
+    return {
+    type: "resource",
+    date: new Date().toLocaleDateString(),
+    categorie: category,
+    links: {
+       sandwichs: {
+          href: "/categorie/"+req.params.id+"/sandwichs"
+       },
+       self: {
+          href: "/categorie/"+req.params.id
+       }
+    }
+ };
+};
 
-module.exports = mongoose.model("Category", schema);
+module.exports = ex;

@@ -18,10 +18,20 @@ router.get('/', async (req, res)=>{
 });
 
 router.get('/:id', async (req, res)=>{
-   let category=await Categories.find();
+   let category=await Categories.where("id="+req.params.id);
     if(category){
        console.dir(category);
-       res.json(category);
+       res.json(category.toJson());
+    }
+    else
+      res.status(404).send("Not Found");
+});
+
+router.get('/:id/sandwichs', async (req, res)=>{
+   let sandwichs=await Sandwichs.where(req.params.id+" in cateories");
+    if(sandwichs){
+       console.dir(sandwichs);
+       res.json(sandwichs);
     }
     else
       res.status(404).send("Not Found");

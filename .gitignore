@@ -75,3 +75,4 @@ mysqldata
 
 # Database
 mysql_data/
+mongo/
