@@ -3,6 +3,7 @@ const bodyparser = require("body-parser");
 const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
 const moment = require('moment');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const jsonparser = bodyparser.json();
@@ -13,7 +14,12 @@ const dbclient = require("../utils/DBClient");
 
 router.get("/", async (req, res, next) => {
     try {
-        const commandes = await dbclient.all("SELECT id, created_at, mail, montant FROM commande");
+        let token = '';
+        if (req.query.token)
+            token = req.query.token;
+        else if (req.header('X-lbs-token'))
+            token = req.header('X-lbs-token');
+        const commandes = await dbclient.all("SELECT id, created_at, mail, montant FROM commande WHERE token = '"+token+"'");
         if (commandes)
             return res.json({
                 type: "collection",
@@ -54,8 +60,11 @@ router.get("/", async (req, res, next) => {
             return handler404(res);
         } else if (req.body.nom && validator.isAscii(req.body.nom) && req.body.mail && validator.isEmail(req.body.mail) && req.body.livraison.date && req.body.livraison.heure && moment(req.body.livraison.date+' '+req.body.livraison.heure, 'D-MM-YYYY HH:mm', true).isValid()) {
             let nouveauid = uuidv4();
-            await dbclient.query("INSERT INTO commande (id, created_at, livraison, nom, mail, montant) VALUES ('"+nouveauid+"', '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', '"+moment(req.body.livraison.date+' '+req.body.livraison.heure, 'D-MM-YYYY HH:mm', true).format('YYYY-MM-DD HH:mm:ss')+"', '"+validator.escape(req.body.nom)+"', '"+req.body.mail+"', 0)");
-            const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant FROM commande WHERE id = '"+nouveauid+"'");
+            let token = jwt.sign({
+                nom: validator.escape(req.body.nom)
+            }, nouveauid);
+            await dbclient.query("INSERT INTO commande (id, created_at, livraison, nom, mail, montant, token) VALUES ('"+nouveauid+"', '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', '"+moment(req.body.livraison.date+' '+req.body.livraison.heure, 'D-MM-YYYY HH:mm', true).format('YYYY-MM-DD HH:mm:ss')+"', '"+validator.escape(req.body.nom)+"', '"+req.body.mail+"', 0, '"+token+"')");
+            const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant, token FROM commande WHERE id = '"+nouveauid+"'");
             if (commande) {
                 res.set('Location', '/commandes/'+nouveauid);
                 return res.status(201).json({
@@ -82,7 +91,12 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
     try {
-        const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant FROM commande WHERE id = '"+req.params.id+"'");
+        let token = '';
+        if (req.query.token)
+            token = req.query.token;
+        else if (req.header('X-lbs-token'))
+            token = req.header('X-lbs-token');
+        const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant FROM commande WHERE id = '"+req.params.id+"' AND token = '"+token+"'");
         if (commande)
             return res.json({
                 type: "resource",
