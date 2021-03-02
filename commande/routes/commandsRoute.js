@@ -1,57 +1,76 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
+axios.defaults.baseURL = "http://172.20.0.4:3000";
+axios.defaults.headers.post['Content-Type'] ='application/json;charset=utf-8';
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 var uuid = require("uuid");
 
 const con=require('../DBConnection.js');
 
 async function getCommands(status, page, size){
-    let conn = await con.getConnection();
-    let query=  "SELECT * FROM commande";
-    let params=[];
- 
-    if(status && typeof status === "number") {
-       status=parseInt(status);
-       query += " WHERE status = ?";
-       params.push(status);
-    }
- 
-    if(size && typeof size === "number" && page && typeof page === "number"){
-       query += " LIMIT ?, ?";
-       page=parseInt(page);
-       size=parseInt(size);
-       params.push((page>1)?(((page-1)*size)-1):(0));
-       params.push(size);
-    }
- 
-    query+=" ORDER BY created_at, livraison DESC;";
-    console.log("QUERY: "+query+", PARAMS: "+params);
-    let result = await conn.query(query, params);
-       
-    return result;
- }
- async function getCommand(id) {
-     let conn = await con.getConnection();
-     let result = await conn.query("SELECT * FROM commande where id like ?",[id]);
-     
-     return result[0];
+   let conn = await con.getConnection();
+   let query=  "SELECT * FROM commande";
+   let params=[];
 
+   if(status && typeof status === "number") {
+      status=parseInt(status);
+      query += " WHERE status = ?";
+      params.push(status);
    }
- async function getCommandByToken(id, token) {
-    if(token){
+
+   if(size && typeof size === "number" && page && typeof page === "number"){
+      query += " LIMIT ?, ?";
+      page=parseInt(page);
+      size=parseInt(size);
+      params.push((page>1)?(((page-1)*size)-1):(0));
+      params.push(size);
+   }
+
+   query+=" ORDER BY created_at, livraison DESC;";
+   console.log("QUERY: "+query+", PARAMS: "+params);
+   let result = await conn.query(query, params);
+      
+   return result;
+}
+
+async function getCommand(id) {
+   let conn = await con.getConnection();
+   let result = await conn.query("SELECT * FROM commande WHERE commande.id LIKE ?",[id]);
+   conn.end();
+   return result[0];
+
+}
+
+async function getCommandItems(id) {
+   let conn = await con.getConnection();
+   let result = await conn.query("SELECT * FROM item WHERE command_id = ?",[id]);
+
+   return result.map((item)=>{
+      return {
+         uri: item.uri,
+         q: item.quantite
+      };
+   });
+}
+
+async function getCommandByToken(id, token) {
+   if(token){
       let conn = await con.getConnection();
       let command = await conn.query("SELECT * FROM commande where id like ?",[id]);
       command =command[0];
 
-      if(command && command.token===token)
+      if(command && command.token===token){
          return command;
+      }
       else
          return false;
-    }
-    else
+   }
+   else
       return false;
- }
+}
  
 async function updateCommandStatus(id, status) {
     if(typeof status === "number"){
@@ -62,15 +81,43 @@ async function updateCommandStatus(id, status) {
    }
     else
        return false;
- }
+}
+
+async function insertItems(items, commande_id){
+   if(items!=null && commande_id!=null){
+      items.forEach(async (item)=>{
+
+         let uri=item.uri;
+         let libelle, montant;
+         let quantite=item.q;
+
+         try{
+            let response = await axios.get(uri);
+            
+            //console.log({response});
+
+            libelle=response.data.sandwich.nom;
+            montant=response.data.sandwich.prix;
+            
+            let conn = await con.getConnection();
+            await conn.query("INSERT INTO item(uri, libelle, tarif, quantite, command_id) VALUES(?, ?, ?, ?, ?)",[uri, libelle, montant, quantite, commande_id]);
+            conn.end();
+         }catch(error){
+            console.log(error);
+         }
+      });
+   }
+}
 
 async function insertCommand(body) {
-    if(body!=null && body.nom!=null && body.mail!=null && body.date!=null)
+    if(body!=null && body.nom!=null && body.mail!=null && body.date!=null && body.items!=null)
     {
         let nom=body.nom;
         let mail=body.mail;
         let livraison=body.date;
         let id= uuid.v4();
+        let items=body.items;
+
         //console.log("id v4 random:", id);
         while(await getCommand(id)){
             id = uuid.v4();
@@ -82,9 +129,11 @@ async function insertCommand(body) {
 
         let conn = await con.getConnection();
         let result = await conn.query("INSERT INTO commande(id, nom, mail, livraison, token, montant) VALUES(?, ?, ?, ?, ?, ?)",[id, nom, mail, livraison, token, montant]);
-        
-        if(result.affectedRows>0)
-            return await getCommand(id);
+        conn.end();
+        if(result.affectedRows>0) {
+           await insertItems(items, id);
+           return await getCommand(id);
+        }
         else
             return false;
     }
@@ -107,28 +156,27 @@ router.get('/', async (req, res)=>{
  
  router.get('/:id', async (req, res)=>{
     let commande = await getCommandByToken(req.params.id, (req.query.token)?req.query.token:req.header('X-lbs-token'));
-    if(commande)
-       res.json({
-          type: "resource",
-          command: {
-             id: commande.id,
-             livraison: commande.livraison,
-             nom: commande.nom,
-             mail: commande.mail,
-             montant: commande.montant,
-             token: commande.token,
-             status: commande.status
-          },
-          links: {
-             self: {href: "/commands/"+commande.id+"?token="+commande.token}
-          }
-         });
-    else
+    if(commande) {
+      let items = await getCommandItems(commande.id);
+      res.json({
+         type: "resource",
+         command: {
+            id: commande.id,
+            livraison: commande.livraison,
+            nom: commande.nom,
+            mail: commande.mail,
+            montant: commande.montant,
+            token: commande.token,
+            items:items,
+            status: commande.status
+         },
+         links: {
+            self: {href: "/commands/"+commande.id+"?token="+commande.token}
+         }
+      });
+   }
+   else
       res.status(404).send("Commande introuvable");
- });
- 
- router.get('/:id/items', async (req, res)=>{
-     res.status(404).send("To Implement");
 });
 
  router.put("/:id/:status", async (req, res)=>{
@@ -143,20 +191,22 @@ router.post('/', async (req, res)=>{
     let commande = await insertCommand(req.body);
     if(commande)
     {
-        res.status(201).setHeader("Location", req.headers.host+"/commandes/"+commande.id).json({
-            type: "ressource",
-            commande: {
-               nom: commande.nom,
-               mail: commande.mail,
-               livraison: commande.livraison,
-               id: commande.id,
-               token: commande.token,
-               montant: commande.montant
-            }
-        });
+      let items;// = await getCommandItems(commande.id);
+      res.status(201).setHeader("Location", req.headers.host+"/commandes/"+commande.id).json({
+         type: "ressource",
+         commande: {
+            nom: commande.nom,
+            mail: commande.mail,
+            livraison: commande.livraison,
+            id: commande.id,
+            token: commande.token,
+            items: items,
+            montant: commande.montant
+         }
+      });
     }
     else
-       res.status(404).send("Opération impossible");
+      res.status(404).send("Opération impossible");
 });
 
  module.exports = router;

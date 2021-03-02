@@ -11,6 +11,7 @@
   "author": "Alexandre Leroux <alex@sherpa.one> (https://sherpa.one)",
   "license": "UNLICENSED",
   "dependencies": {
+    "axios": "0.21.1",
     "express": "^4.17.1",
     "jsonwebtoken": "8.5.1",
     "mariadb": "^2.5.2",
