@@ -134,7 +134,8 @@ router.get('/:ref', async (req, res, next) => {
                     nom: sandwich.nom,
                     description: sandwich.description,
                     type_pain: sandwich.type_pain,
-                    categories: sandwich.categories
+                    categories: sandwich.categories,
+                    prix: parseFloat(sandwich.prix)
                 }
             });
         }
