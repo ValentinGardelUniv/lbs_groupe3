@@ -1,10 +1,12 @@
-catalogue/node_modules
-catalogue/package-lock.json
 commande/node_modules
 commande/package-lock.json
-mongo/data
-mongo/logs
-mongo/init-mongo.js
-mysql/data
+commande_db/data
+fidelisation/node_modules
+fidelisation/package-lock.json
+fidelisation_db/data
+catalogue/node_modules
+catalogue/package-lock.json
+catalogue_db/data
+catalogue_db/init-mongo.js
 
 .env.*

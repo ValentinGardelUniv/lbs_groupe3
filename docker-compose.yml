@@ -1,9 +1,9 @@
 version: "3"
 
 services:
-  ##################
-  ## API COMMANDE ##
-  ##################
+  ####################
+  ### API COMMANDE ###
+  ####################
   commande:
     image: node
     ports:
@@ -17,24 +17,48 @@ services:
     #command: bash -c 'npm -i && npm start'
     command: bash -c 'npm i && npm run dev'
     links:
-      - mysql
-  mysql:
+      - commande_db
+  commande_db:
     image: mariadb
     env_file:
-      - ./mysql/.env.dev
+      - ./commande_db/.env.dev
     volumes:
-      - ./mysql/data:/var/lib/mysql
+      - ./commande_db/data:/var/lib/mysql
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci
+  ####################
+  # API FIDÉLISATION #
+  ####################
+  fidelisation:
+    image: node
+    ports:
+      - "3002:3000"
+    env_file:
+      - ./fidelisation/.env.dev
+    volumes:
+      - ./fidelisation:/usr/src/app
+    working_dir: /usr/src/app
+    #command: npm start
+    #command: bash -c 'npm -i && npm start'
+    command: bash -c 'npm i && npm run dev'
+    links:
+      - fidelisation_db
+  fidelisation_db:
+    image: mariadb
+    env_file:
+      - ./fidelisation_db/.env.dev
+    volumes:
+      - ./fidelisation_db/data:/var/lib/mysql
     command: --character-set-server=utf8 --collation-server=utf8_general_ci
   adminer:
     image: adminer
     ports:
       - "4000:8080"
-    restart: always
     links:
-      - mysql
-  ###################
-  ## API CATALOGUE ##
-  ###################
+      - commande_db
+      - fidelisation_db
+  #####################
+  ### API CATALOGUE ###
+  #####################
   catalogue:
     image: node
     ports:
@@ -48,16 +72,15 @@ services:
     #command: bash -c 'npm -i && npm start'
     command: bash -c 'npm i && npm run dev'
     links:
-      - mongo
-  mongo:
+      - catalogue_db
+  catalogue_db:
     image: mongo
     env_file:
-      - ./mongo/.env.dev
+      - ./catalogue_db/.env.dev
     volumes:
-      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-      - ./mongo/data:/data/db
-      - ./mongo/logs:/var/log/mongodb
-      - ./mongo/schema:/var/schema
+      - ./catalogue_db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./catalogue_db/data:/data/db
+      - ./catalogue_db/schema:/var/schema
     working_dir: /var/schema
     command: [--auth]
   mongo-express:
@@ -67,4 +90,4 @@ services:
     env_file:
       - ./mongo-express/.env.dev
     links:
-      - mongo
+      - catalogue_db
