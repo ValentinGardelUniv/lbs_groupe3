@@ -1,4 +1,4 @@
-const dbconnection = require("./DBConnection");
+const dbconnection = require('./DBConnection');
 
 class DBClient {
     static async all(query) {

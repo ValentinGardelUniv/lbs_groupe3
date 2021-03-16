@@ -1,22 +1,22 @@
-const express = require("express");
+const express = require('express');
 
 const app = express();
 
 const localport = process.env.LOCAL_PORT;
 const distport = process.env.DIST_PORT;
 
-const logger = require("./middlewares/logger");
-const indexroutes = require("./routes/indexroutes");
-const cartesroutes = require("./routes/cartesroutes");
-const error400 = require("./middlewares/error400");
-const error500 = require("./middlewares/error500");
+const logger = require('./middlewares/logger');
+const indexroutes = require('./routes/indexroutes');
+const cartesroutes = require('./routes/cartesroutes');
+const error400 = require('./middlewares/error400');
+const error500 = require('./middlewares/error500');
 
 // Logger
 app.use(logger);
 
 // Routes
-app.use("/", indexroutes);
-app.use("/cartes", cartesroutes);
+app.use('/', indexroutes);
+app.use('/cartes', cartesroutes);
 
 // Quand la route n'est pas connue
 app.use(error400);

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
     id: { type: Number, index: true, unique: true, required: true },
@@ -6,4 +6,4 @@ const schema = new mongoose.Schema({
     description: { type: String, text: true }
 });
 
-module.exports = mongoose.model("Categorie", schema);
+module.exports = mongoose.model('Categorie', schema);

@@ -1,9 +1,9 @@
 // Quand la méthode utilisée ne correspond pas
 const handler405 = function(req, res) {
     res.status(405).json({
-        type: "error",
+        type: 'error',
         error: 405,
-        message: "Method Not Allowed"
+        message: 'Method Not Allowed'
     });
 }
 

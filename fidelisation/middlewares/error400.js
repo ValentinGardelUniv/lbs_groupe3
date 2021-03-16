@@ -1,8 +1,8 @@
 const error400 = function(req, res) {
     res.status(400).json({
-        type: "error",
+        type: 'error',
         error: 400,
-        message: "Bad Request"
+        message: 'Bad Request'
     });
 };
 

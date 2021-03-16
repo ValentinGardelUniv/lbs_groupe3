@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   ####################
@@ -7,7 +7,7 @@ services:
   commande:
     image: node
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - ./commande/.env.dev
     volumes:
@@ -31,7 +31,7 @@ services:
   fidelisation:
     image: node
     ports:
-      - "3002:3000"
+      - '3002:3000'
     env_file:
       - ./fidelisation/.env.dev
     volumes:
@@ -52,7 +52,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - "4000:8080"
+      - '4000:8080'
     links:
       - commande_db
       - fidelisation_db
@@ -62,7 +62,7 @@ services:
   catalogue:
     image: node
     ports:
-      - "3001:3000"
+      - '3001:3000'
     env_file:
       - ./catalogue/.env.dev
     volumes:
@@ -86,7 +86,7 @@ services:
   mongo-express:
     image: mongo-express
     ports:
-      - "4001:8081"
+      - '4001:8081'
     env_file:
       - ./mongo-express/.env.dev
     links:

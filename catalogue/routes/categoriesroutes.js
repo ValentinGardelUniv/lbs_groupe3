@@ -2,10 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 
-const handler404 = require("../utils/handler404");
-const handler405 = require("../utils/handler405");
-const Categorie = require("../models/Categorie");
-const Sandwich = require("../models/Sandwich");
+const handler404 = require('../utils/handler404');
+const handler405 = require('../utils/handler405');
+const Categorie = require('../models/Categorie');
+const Sandwich = require('../models/Sandwich');
 
 router.get('/:id', async (req, res, next) => {
     let categorie = [];
@@ -17,13 +17,13 @@ router.get('/:id', async (req, res, next) => {
             let dateaujourdhui = new Date();
             let journeeaujourdhui = dateaujourdhui.getDate();
             if (journeeaujourdhui < 10)
-                journeeaujourdhui = "0" + journeeaujourdhui;
+                journeeaujourdhui = '0' + journeeaujourdhui;
             let moisaujourdhui = dateaujourdhui.getMonth() + 1;
             if (moisaujourdhui < 10)
-                moisaujourdhui = "0" + moisaujourdhui;
+                moisaujourdhui = '0' + moisaujourdhui;
             return res.json({
-                type: "resource",
-                date: journeeaujourdhui + "-" + moisaujourdhui + "-" + dateaujourdhui.getFullYear(),
+                type: 'resource',
+                date: journeeaujourdhui + '-' + moisaujourdhui + '-' + dateaujourdhui.getFullYear(),
                 categorie: {
                     id: categorie.id,
                     nom: categorie.nom,
@@ -31,10 +31,10 @@ router.get('/:id', async (req, res, next) => {
                 },
                 links: {
                     sandwichs: {
-                        href: "/categories/"+req.params.id+"/sandwichs"
+                        href: '/categories/'+req.params.id+'/sandwichs'
                     },
                     self: {
-                        href: "/categories/"+req.params.id
+                        href: '/categories/'+req.params.id
                     }
                 }
             });
@@ -59,10 +59,10 @@ router.get('/:id/sandwichs', async (req, res, next) => {
                 let dateaujourdhui = new Date();
                 let journeeaujourdhui = dateaujourdhui.getDate();
                 if (journeeaujourdhui < 10)
-                    journeeaujourdhui = "0" + journeeaujourdhui;
+                    journeeaujourdhui = '0' + journeeaujourdhui;
                 let moisaujourdhui = dateaujourdhui.getMonth() + 1;
                 if (moisaujourdhui < 10)
-                    moisaujourdhui = "0" + moisaujourdhui;
+                    moisaujourdhui = '0' + moisaujourdhui;
                 // Première itération pour donner la forme
                 let sandwichsprepares = [];
                 sandwichs.forEach((sandwich) => {
@@ -77,20 +77,20 @@ router.get('/:id/sandwichs', async (req, res, next) => {
                         },
                         links: {
                             self: {
-                                href: "/sandwichs/" + sandwich.ref
+                                href: '/sandwichs/' + sandwich.ref
                             }
                         }
                     });
                 });
                 return res.json({
-                    type: "collection",
+                    type: 'collection',
                     count: sandwichsprepares.length,
-                    date: journeeaujourdhui + "-" + moisaujourdhui + "-" + dateaujourdhui.getFullYear(),
+                    date: journeeaujourdhui + '-' + moisaujourdhui + '-' + dateaujourdhui.getFullYear(),
                     sandwichs: sandwichsprepares,
                     links: {
                         all: {
-                            msg: "Pour afficher la liste complète des sandwichs",
-                            href: "/sandwichs?c="+categorie.nom
+                            msg: 'Pour afficher la liste complète des sandwichs',
+                            href: '/sandwichs?c='+categorie.nom
                         }
                     }
                 });

@@ -1,9 +1,8 @@
 const error500 = function(err, req, res) {
-    console.log("fsf");
     return res.status(500).json({
-        type: "error",
+        type: 'error',
         error: 500,
-        message: "Internal Server Error"
+        message: 'Internal Server Error'
     });
 };
 

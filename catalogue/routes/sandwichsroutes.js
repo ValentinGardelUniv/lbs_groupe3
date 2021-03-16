@@ -2,10 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 
-const handler404 = require("../utils/handler404");
-const handler405 = require("../utils/handler405");
-const Sandwich = require("../models/Sandwich");
-const Categorie = require("../models/Categorie");
+const handler404 = require('../utils/handler404');
+const handler405 = require('../utils/handler405');
+const Sandwich = require('../models/Sandwich');
+const Categorie = require('../models/Categorie');
 
 router.get('/', async (req, res, next) => {
     let sandwichs = [];
@@ -15,10 +15,10 @@ router.get('/', async (req, res, next) => {
             let dateaujourdhui = new Date();
             let journeeaujourdhui = dateaujourdhui.getDate();
             if (journeeaujourdhui < 10)
-                journeeaujourdhui = "0" + journeeaujourdhui;
+                journeeaujourdhui = '0' + journeeaujourdhui;
             let moisaujourdhui = dateaujourdhui.getMonth() + 1;
                 if (moisaujourdhui < 10)
-                    moisaujourdhui = "0" + moisaujourdhui;
+                    moisaujourdhui = '0' + moisaujourdhui;
             // Première itération pour donner la forme et le filtrage
             let sandwichsprepares = [];
             sandwichs.forEach((sandwich) => {
@@ -35,7 +35,7 @@ router.get('/', async (req, res, next) => {
                     },
                     links: {
                         self: {
-                            href: "/sandwichs/" + sandwich.ref
+                            href: '/sandwichs/' + sandwich.ref
                         }
                     }
                 });
@@ -44,9 +44,9 @@ router.get('/', async (req, res, next) => {
             let sandwichsparpage = 10;
             if (sandwichsprepares.length <= sandwichsparpage && !req.query.size && !req.query.page)
                 return res.json({
-                    type: "collection",
+                    type: 'collection',
                     count: sandwichsprepares.length,
-                    date: journeeaujourdhui + "-" + moisaujourdhui + "-" + dateaujourdhui.getFullYear(),
+                    date: journeeaujourdhui + '-' + moisaujourdhui + '-' + dateaujourdhui.getFullYear(),
                     sandwichs: sandwichsprepares
                 });
             // Deuxième itération pour effectuer la pagination
@@ -78,24 +78,24 @@ router.get('/', async (req, res, next) => {
             if (numeropagesuivante < Math.ceil(sandwichsprepares.length/sandwichsparpage))
                 numeropagesuivante++;
             return res.json({
-                type: "collection",
+                type: 'collection',
                 count: sandwichsprepares.length,
                 size: sandwichspreparespagines.length,
                 links: {
                     next: {
-                        href: "/sandwichs?page=" + numeropagesuivante + "&size=" + sandwichsparpage
+                        href: '/sandwichs?page=' + numeropagesuivante + '&size=' + sandwichsparpage
                     },
                     prev: {
-                        href: "/sandwichs?page=" + numeropageprecedente + "&size=" + sandwichsparpage
+                        href: '/sandwichs?page=' + numeropageprecedente + '&size=' + sandwichsparpage
                     },
                     last: {
-                        href: "/sandwichs?page=" + Math.ceil(sandwichsprepares.length/sandwichsparpage) + "&size=" + sandwichsparpage
+                        href: '/sandwichs?page=' + Math.ceil(sandwichsprepares.length/sandwichsparpage) + '&size=' + sandwichsparpage
                     },
                     first: {
-                        href: "/sandwichs?page=1&size=" + sandwichsparpage
+                        href: '/sandwichs?page=1&size=' + sandwichsparpage
                     }
                 },
-                date: journeeaujourdhui + "-" + moisaujourdhui + "-" + dateaujourdhui.getFullYear(),
+                date: journeeaujourdhui + '-' + moisaujourdhui + '-' + dateaujourdhui.getFullYear(),
                 sandwichs: sandwichspreparespagines
             });
         }
@@ -123,10 +123,10 @@ router.get('/:ref', async (req, res, next) => {
                     };
                 });
             return res.json({
-                type: "resource",
+                type: 'resource',
                 links: {
                     self: {
-                        href: "/sandwichs/"+req.params.ref
+                        href: '/sandwichs/'+req.params.ref
                     }
                 },
                 sandwich: {

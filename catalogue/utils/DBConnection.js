@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://" + process.env.MONGO_USER + ":" + process.env.MONGO_PASSWORD + "@" + process.env.MONGO_HOST + ":27017/" + process.env.MONGO_DATABASE, {
+mongoose.connect('mongodb://' + process.env.MONGO_USER + ':' + process.env.MONGO_PASSWORD + '@' + process.env.MONGO_HOST + ':27017/' + process.env.MONGO_DATABASE, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
