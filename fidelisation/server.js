@@ -7,6 +7,7 @@ const distport = process.env.DIST_PORT;
 
 const logger = require("./middlewares/logger");
 const indexroutes = require("./routes/indexroutes");
+const cartesroutes = require("./routes/cartesroutes");
 const error400 = require("./middlewares/error400");
 const error500 = require("./middlewares/error500");
 
@@ -15,6 +16,7 @@ app.use(logger);
 
 // Routes
 app.use("/", indexroutes);
+app.use("/cartes", cartesroutes);
 
 // Quand la route n'est pas connue
 app.use(error400);

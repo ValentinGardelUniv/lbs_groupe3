@@ -3,7 +3,7 @@ const bodyparser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
 const moment = require('moment');
-const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const axios = require('axios');
 
 const router = express.Router();
@@ -61,9 +61,7 @@ router.get("/", async (req, res, next) => {
             return handler404(res);
         } else if (req.body.nom && validator.isAscii(req.body.nom) && req.body.mail && validator.isEmail(req.body.mail) && req.body.livraison.date && req.body.livraison.heure && moment(req.body.livraison.date+' '+req.body.livraison.heure, "D-MM-YYYY HH:mm", true).isValid() && req.body.items) {
             let nouveauid = uuidv4();
-            let token = jwt.sign({
-                nom: validator.escape(req.body.nom)
-            }, nouveauid);
+            let token = crypto.randomBytes(32).toString('hex');
             // On récupère les informations sur les items depuis l'API catalogue, on les insère dans la BD et on calcule le montant de la commande
             let montant = 0;
             await Promise.all(req.body.items.map(async (item) => {
