@@ -40,6 +40,7 @@ router.get('/', async (req, res, next) => {
     }
 }).post('/', jsonparser, async (req, res, next) => {
     try {
+        // Création simpliste (cf TD3)
         if (req.body.nom_client && validator.isAscii(req.body.nom_client) && req.body.mail_client && validator.isEmail(req.body.mail_client) && req.body.date_livraison && moment(req.body.date_livraison, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
             let nouveauid = uuidv4();
             await dbclient.query("INSERT INTO commande (id, created_at, livraison, nom, mail) VALUES ('"+nouveauid+"', '"+moment().format("YYYY-MM-DD HH:mm:ss")+"', '"+req.body.date_livraison+"', '"+validator.escape(req.body.nom_client)+"', '"+req.body.mail_client+"')");
@@ -59,6 +60,7 @@ router.get('/', async (req, res, next) => {
                 });
             }
             return handler404(res);
+        // Méthode de création finale (TD6)
         } else if (req.body.nom && validator.isAscii(req.body.nom) && req.body.mail && validator.isEmail(req.body.mail) && req.body.livraison.date && req.body.livraison.heure && moment(req.body.livraison.date+' '+req.body.livraison.heure, 'D-MM-YYYY HH:mm', true).isValid() && req.body.items) {
             let nouveauid = uuidv4();
             let token = crypto.randomBytes(32).toString('hex');
@@ -125,6 +127,31 @@ router.get('/:id', async (req, res, next) => {
                 }
             });
         return handler404(res);
+    } catch(err) {
+        next(500);
+    }
+}).all(handler405);
+
+router.post('/:id/payment', jsonparser, async (req, res, next) => {
+    try {
+        let token = '';
+        if (req.query.token)
+            token = req.query.token;
+        else if (req.header('X-lbs-token'))
+            token = req.header('X-lbs-token');
+        if (req.body.cartebleue && validator.isCreditCard(req.body.cartebleue)) {
+            const commande = await dbclient.one("SELECT id, montant, token FROM commande WHERE id = '"+req.params.id+"' AND token = '"+token+"'");
+            if (commande) {
+                // La commande change le statut
+                await dbclient.query("UPDATE commande SET ref_paiement = '"+crypto.randomBytes(48).toString('hex')+"', date_paiement = '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', mode_paiement = 1, status = 2 WHERE id = '"+commande.id+"'");
+                if (req.body.token_fidelisation && validator.isJWT(req.body.token_fidelisation)) {
+                    // Enregistrement auprès du service de fidélisation
+                    //axios.get('http://catalogue:3000'+item.uri);
+                }
+            } else
+                return handler404(res);
+        } else
+            next(500);
     } catch(err) {
         next(500);
     }
