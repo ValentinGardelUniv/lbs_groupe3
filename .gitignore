@@ -12,5 +12,6 @@ gestion/node_modules
 gestion/package-lock.json
 catalogue-gestion_db/data
 catalogue-gestion_db/init-mongo.js
+stories/arc-data-export.json
 
 .env.*

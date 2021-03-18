@@ -17,7 +17,6 @@
         "prix": {
                     "$numberDecimal": "6.00"
                 }
-
     },
     {
         "ref": "s19002",
