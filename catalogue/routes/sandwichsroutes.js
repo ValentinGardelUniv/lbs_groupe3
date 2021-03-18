@@ -17,8 +17,8 @@ router.get('/', async (req, res, next) => {
             if (journeeaujourdhui < 10)
                 journeeaujourdhui = '0' + journeeaujourdhui;
             let moisaujourdhui = dateaujourdhui.getMonth() + 1;
-                if (moisaujourdhui < 10)
-                    moisaujourdhui = '0' + moisaujourdhui;
+            if (moisaujourdhui < 10)
+                moisaujourdhui = '0' + moisaujourdhui;
             // Première itération pour donner la forme et le filtrage
             let sandwichsprepares = [];
             sandwichs.forEach((sandwich) => {

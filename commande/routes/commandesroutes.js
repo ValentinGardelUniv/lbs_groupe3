@@ -113,7 +113,7 @@ router.get('/:id', async (req, res, next) => {
             token = req.query.token;
         else if (req.header('X-lbs-token'))
             token = req.header('X-lbs-token');
-        const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant FROM commande WHERE id = '"+req.params.id+"' AND token = '"+token+"'");
+        const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant, status FROM commande WHERE id = '"+req.params.id+"' AND token = '"+token+"'");
         if (commande)
             return res.json({
                 type: 'resource',
@@ -123,7 +123,8 @@ router.get('/:id', async (req, res, next) => {
                     nom_client: commande.nom,
                     date_commande: commande.created_at,
                     date_livraison: commande.livraison,
-                    montant: commande.montant
+                    montant: commande.montant,
+                    statut: commande.status
                 }
             });
         return handler404(res);

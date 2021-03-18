@@ -15,14 +15,9 @@
   "author": "engenteur",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
-    "crypto": "^1.0.1",
     "express": "^4.17.1",
     "moment": "^2.29.1",
-    "mysql": "^2.18.1",
-    "uuid": "^8.3.2",
-    "validator": "^13.5.2"
+    "mysql": "^2.18.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
