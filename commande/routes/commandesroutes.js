@@ -43,7 +43,7 @@ router.get('/', async (req, res, next) => {
         // Création simpliste (cf TD3)
         if (req.body.nom_client && validator.isAscii(req.body.nom_client) && req.body.mail_client && validator.isEmail(req.body.mail_client) && req.body.date_livraison && moment(req.body.date_livraison, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
             let nouveauid = uuidv4();
-            await dbclient.query("INSERT INTO commande (id, created_at, livraison, nom, mail) VALUES ('"+nouveauid+"', '"+moment().format("YYYY-MM-DD HH:mm:ss")+"', '"+req.body.date_livraison+"', '"+validator.escape(req.body.nom_client)+"', '"+req.body.mail_client+"')");
+            await dbclient.query("INSERT INTO commande (id, created_at, livraison, nom, mail) VALUES ('"+nouveauid+"', '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', '"+req.body.date_livraison+"', '"+validator.escape(req.body.nom_client)+"', '"+req.body.mail_client+"')");
             const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant FROM commande WHERE id = '"+nouveauid+"'");
             if (commande) {
                 res.set('Location', '/commandes/'+nouveauid);
@@ -146,7 +146,7 @@ router.post('/:id/payment', jsonparser, async (req, res, next) => {
                 // La commande change le statut
                 await dbclient.query("UPDATE commande SET ref_paiement = '"+crypto.randomBytes(48).toString('hex')+"', date_paiement = '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', mode_paiement = 1, status = 2 WHERE id = '"+commande.id+"'");
                 // Enregistrement auprès du service de fidélisation
-                await axios.post('http://fidelisation:3000/cartes/'+req.body.fidelisation.id_carte, {
+                await axios.post('http://fidelisation:3000/cartes/'+validator.escape(req.body.fidelisation.id_carte), {
                     montant: commande.montant
                 }, {
                     headers: {

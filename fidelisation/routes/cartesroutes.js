@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bodyparser = require('body-parser');
 const validator = require('validator');
 const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 const jsonparser = bodyparser.json();
@@ -86,7 +87,7 @@ router.get('/:id', async (req, res, next) => {
                     await dbclient.query("UPDATE carte_fidelite SET cumul_achats = "+(carte.cumul_achats+req.body.montant)+", updated_at = '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', cumul_commandes = "+(carte.cumul_commandes+1)+" WHERE id = '"+idcarte+"'");
                     // On insère la commande
                     let retour = await dbclient.query("INSERT INTO commande (carte_id, montant, created_at) VALUES ('"+idcarte+"', "+req.body.montant+", '"+moment().format('YYYY-MM-DD HH:mm:ss')+"')");
-                    if (!(retour.affectedRows === 1))
+                    if (retour.affectedRows !== 1)
                         next(500);
                     carte = await dbclient.one("SELECT id, nom_client, mail_client, cumul_achats, cumul_commandes FROM carte_fidelite WHERE id = '"+idcarte+"'");
                     return res.json({
@@ -110,5 +111,22 @@ router.get('/:id', async (req, res, next) => {
     }
 }).all(handler405);
 
+router.post('/', jsonparser, async (req, res, next) => {
+    try {
+        if (req.body.nom && validator.isAscii(req.body.nom) && req.body.mail && validator.isEmail(req.body.mail) && req.body.mdp && validator.isAscii(req.body.mdp)) {
+            let nouveauid = uuidv4();
+            let mdphashe = bcrypt.hashSync(req.body.mdp, 10);
+            let retour = await dbclient.query("INSERT INTO carte_fidelite (id, nom_client, mail_client, passwd, created_at) VALUES ('"+nouveauid+"', '"+validator.escape(req.body.nom)+"', '"+req.body.mail+"', '"+mdphashe+"', '"+moment().format('YYYY-MM-DD HH:mm:ss')+"')");
+            if (retour.affectedRows !== 1)
+                next(500);
+            return res.json({
+                id: nouveauid
+            });
+        } else
+            next(500);
+    } catch(err) {
+        next(500);
+    }
+}).all(handler405);
 
 module.exports = router;
