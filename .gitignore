@@ -1,6 +1,8 @@
 commande/node_modules
 commande/package-lock.json
-commande_db/data
+suivi/node_modules
+suivi/package-lock.json
+commande-suivi_db/data
 fidelisation/node_modules
 fidelisation/package-lock.json
 fidelisation_db/data

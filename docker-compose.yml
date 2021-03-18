@@ -2,7 +2,7 @@ version: '3'
 
 services:
   ####################
-  ### API COMMANDE ###
+  ### API COMMANDE ET SUIVI ###
   ####################
   commande:
     image: node
@@ -17,17 +17,31 @@ services:
     #command: bash -c 'npm -i && npm start'
     command: bash -c 'npm i && npm run dev'
     links:
-      - commande_db
-  commande_db:
+      - commande-suivi_db
+  suivi:
+    image: node
+    ports:
+      - '3003:3000'
+    env_file:
+      - ./suivi/.env.dev
+    volumes:
+      - ./suivi:/usr/src/app
+    working_dir: /usr/src/app
+    #command: npm start
+    #command: bash -c 'npm -i && npm start'
+    command: bash -c 'npm i && npm run dev'
+    links:
+      - commande-suivi_db
+  commande-suivi_db:
     image: mariadb
     env_file:
-      - ./commande_db/.env.dev
+      - ./commande-suivi_db/.env.dev
     volumes:
-      - ./commande_db/data:/var/lib/mysql
+      - ./commande-suivi_db/data:/var/lib/mysql
     command: --character-set-server=utf8 --collation-server=utf8_general_ci
-  ####################
-  # API FIDÉLISATION #
-  ####################
+  ########################
+  ### API FIDÉLISATION ###
+  ########################
   fidelisation:
     image: node
     ports:
@@ -54,7 +68,7 @@ services:
     ports:
       - '4000:8080'
     links:
-      - commande_db
+      - commande-suivi_db
       - fidelisation_db
   #####################
   ### API CATALOGUE ###

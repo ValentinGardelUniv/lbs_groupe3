@@ -7,7 +7,7 @@ const distport = process.env.DIST_PORT;
 
 const logger = require('./middlewares/logger');
 const indexroutes = require('./routes/indexroutes');
-const cartesroutes = require('./routes/cartesroutes');
+const commandesroutes = require('./routes/commandesroutes');
 const error400 = require('./middlewares/error400');
 const error500 = require('./middlewares/error500');
 
@@ -16,7 +16,7 @@ app.use(logger);
 
 // Routes
 app.use('/', indexroutes);
-app.use('/cartes', cartesroutes);
+app.use('/commandes', commandesroutes);
 
 // Quand la route n'est pas connue
 app.use(error400);
@@ -25,5 +25,5 @@ app.use(error400);
 app.use(error500);
 
 app.listen(localport, function() {
-    console.log(`API fidelisation up and running at localhost:${localport} (distant port : ${distport})`);
+    console.log(`API suivi up and running at localhost:${localport} (distant port : ${distport})`);
 });
