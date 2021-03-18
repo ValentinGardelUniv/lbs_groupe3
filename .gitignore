@@ -8,7 +8,9 @@ fidelisation/package-lock.json
 fidelisation_db/data
 catalogue/node_modules
 catalogue/package-lock.json
-catalogue_db/data
-catalogue_db/init-mongo.js
+gestion/node_modules
+gestion/package-lock.json
+catalogue-gestion_db/data
+catalogue-gestion_db/init-mongo.js
 
 .env.*

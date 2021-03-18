@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  ####################
+  #############################
   ### API COMMANDE ET SUIVI ###
-  ####################
+  #############################
   commande:
     image: node
     ports:
@@ -70,9 +70,9 @@ services:
     links:
       - commande-suivi_db
       - fidelisation_db
-  #####################
-  ### API CATALOGUE ###
-  #####################
+  ################################
+  ### API CATALOGUE ET GESTION ###
+  ################################
   catalogue:
     image: node
     ports:
@@ -86,15 +86,29 @@ services:
     #command: bash -c 'npm -i && npm start'
     command: bash -c 'npm i && npm run dev'
     links:
-      - catalogue_db
-  catalogue_db:
+      - catalogue-gestion_db
+  gestion:
+    image: node
+    ports:
+      - '3004:3000'
+    env_file:
+      - ./gestion/.env.dev
+    volumes:
+      - ./gestion:/usr/src/app
+    working_dir: /usr/src/app
+    #command: npm start
+    #command: bash -c 'npm -i && npm start'
+    command: bash -c 'npm i && npm run dev'
+    links:
+      - catalogue-gestion_db
+  catalogue-gestion_db:
     image: mongo
     env_file:
-      - ./catalogue_db/.env.dev
+      - ./catalogue-gestion_db/.env.dev
     volumes:
-      - ./catalogue_db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-      - ./catalogue_db/data:/data/db
-      - ./catalogue_db/schema:/var/schema
+      - ./catalogue-gestion_db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./catalogue-gestion_db/data:/data/db
+      - ./catalogue-gestion_db/schema:/var/schema
     working_dir: /var/schema
     command: [--auth]
   mongo-express:
@@ -104,4 +118,4 @@ services:
     env_file:
       - ./mongo-express/.env.dev
     links:
-      - catalogue_db
+      - catalogue-gestion_db
