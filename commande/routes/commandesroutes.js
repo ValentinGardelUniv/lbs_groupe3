@@ -139,15 +139,30 @@ router.post('/:id/payment', jsonparser, async (req, res, next) => {
             token = req.query.token;
         else if (req.header('X-lbs-token'))
             token = req.header('X-lbs-token');
-        if (req.body.cartebleue && validator.isCreditCard(req.body.cartebleue)) {
-            const commande = await dbclient.one("SELECT id, montant, token FROM commande WHERE id = '"+req.params.id+"' AND token = '"+token+"'");
+        if (req.body.carte_bleue && validator.isCreditCard(req.body.carte_bleue) && req.body.fidelisation.id_carte && validator.isAscii(req.body.fidelisation.id_carte) && req.body.fidelisation.token && validator.isJWT(req.body.fidelisation.token)) {
+            const commande = await dbclient.one("SELECT id, created_at, livraison, nom, mail, montant FROM commande WHERE id = '"+req.params.id+"' AND token = '"+token+"'");
             if (commande) {
                 // La commande change le statut
                 await dbclient.query("UPDATE commande SET ref_paiement = '"+crypto.randomBytes(48).toString('hex')+"', date_paiement = '"+moment().format('YYYY-MM-DD HH:mm:ss')+"', mode_paiement = 1, status = 2 WHERE id = '"+commande.id+"'");
-                if (req.body.token_fidelisation && validator.isJWT(req.body.token_fidelisation)) {
-                    // Enregistrement auprès du service de fidélisation
-                    //axios.get('http://catalogue:3000'+item.uri);
-                }
+                // Enregistrement auprès du service de fidélisation
+                await axios.post('http://fidelisation:3000/cartes/'+req.body.fidelisation.id_carte, {
+                    montant: commande.montant
+                }, {
+                    headers: {
+                        'Authorization': 'Bearer '+req.body.fidelisation.token
+                    }
+                });
+                return res.json({
+                    type: 'resource',
+                    commande: {
+                        id: commande.id,
+                        mail_client: commande.mail,
+                        nom_client: commande.nom,
+                        date_commande: commande.created_at,
+                        date_livraison: commande.livraison,
+                        montant: commande.montant
+                    }
+                });
             } else
                 return handler404(res);
         } else
