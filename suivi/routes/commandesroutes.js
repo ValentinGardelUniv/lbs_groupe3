@@ -107,7 +107,6 @@ router.get('/', async (req, res, next) => {
         }
         return handler404(res);
     } catch(err) {
-        console.error(err);
         next(500);
     }
 }).all(handler405);
@@ -147,8 +146,8 @@ router.put('/:id/:status', async (req, res, next) => {
         await dbclient.query("UPDATE commande SET status = "+req.params.status+" WHERE id = '"+req.params.id+"'");
         const commande = await dbclient.one("SELECT id, livraison, created_at, mail, status FROM commande WHERE id = '"+req.params.id+"'");
         if (commande) {
-            if (commande.status !== req.params.status)
-                next(500);
+            if (commande.status !== parseInt(req.params.status))
+                return next(500);
             return res.json({
                 type: 'resource',
                 links: {

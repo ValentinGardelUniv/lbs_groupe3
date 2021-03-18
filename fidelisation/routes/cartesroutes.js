@@ -88,7 +88,7 @@ router.get('/:id', async (req, res, next) => {
                     // On insère la commande
                     let retour = await dbclient.query("INSERT INTO commande (carte_id, montant, created_at) VALUES ('"+idcarte+"', "+req.body.montant+", '"+moment().format('YYYY-MM-DD HH:mm:ss')+"')");
                     if (retour.affectedRows !== 1)
-                        next(500);
+                        return next(500);
                     carte = await dbclient.one("SELECT id, nom_client, mail_client, cumul_achats, cumul_commandes FROM carte_fidelite WHERE id = '"+idcarte+"'");
                     return res.json({
                         type: 'resource',
@@ -103,7 +103,7 @@ router.get('/:id', async (req, res, next) => {
                 } else
                     return handler404(res);
             } else
-                next(500);
+                return next(500);
         } else
             return handler401(res);
     } catch(err) {
@@ -118,12 +118,12 @@ router.post('/', jsonparser, async (req, res, next) => {
             let mdphashe = bcrypt.hashSync(req.body.mdp, 10);
             let retour = await dbclient.query("INSERT INTO carte_fidelite (id, nom_client, mail_client, passwd, created_at) VALUES ('"+nouveauid+"', '"+validator.escape(req.body.nom)+"', '"+req.body.mail+"', '"+mdphashe+"', '"+moment().format('YYYY-MM-DD HH:mm:ss')+"')");
             if (retour.affectedRows !== 1)
-                next(500);
+                return next(500);
             return res.json({
                 id: nouveauid
             });
         } else
-            next(500);
+            return next(500);
     } catch(err) {
         next(500);
     }

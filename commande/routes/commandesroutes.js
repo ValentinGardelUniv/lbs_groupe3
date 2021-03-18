@@ -68,7 +68,7 @@ router.get('/', async (req, res, next) => {
             let montant = 0;
             await Promise.all(req.body.items.map(async (item) => {
                 if (!(item.uri && validator.contains(item.uri, '/sandwichs/') && !isNaN(item.q)))
-                    next(500);
+                    return next(500);
                 response = await axios.get('http://catalogue:3000'+item.uri);
                 await dbclient.query("INSERT INTO item (uri, libelle, tarif, quantite, command_id) VALUES ('"+item.uri+"', '"+response.data.sandwich.nom+"', '"+response.data.sandwich.prix+"', "+item.q+", '"+nouveauid+"')");
                 montant += response.data.sandwich.prix * item.q;
@@ -100,7 +100,7 @@ router.get('/', async (req, res, next) => {
             }
             return handler404(res);
         } else
-            next(500);
+            return next(500);
     } catch(err) {
         next(500);
     }
@@ -167,7 +167,7 @@ router.post('/:id/payment', jsonparser, async (req, res, next) => {
             } else
                 return handler404(res);
         } else
-            next(500);
+            return next(500);
     } catch(err) {
         next(500);
     }

@@ -41,7 +41,6 @@ router.get('/:id', async (req, res, next) => {
         }
         return handler404(res);
     } catch (err) {
-        console.error(err);
         next(500);
     }
 }).all(handler405);
