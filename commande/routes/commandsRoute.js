@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const uuid = require("uuid");
+const con = require('../DBConnection.js');
 const axios = require('axios');
-axios.defaults.baseURL = "http://172.20.0.4:3000";
+
+axios.defaults.baseURL = "http://api.catalogue:3000";//"http://172.20.0.6:3000";
 axios.defaults.headers.post['Content-Type'] ='application/json;charset=utf-8';
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
-
-var uuid = require("uuid");
-
-const con=require('../DBConnection.js');
 
 async function getCommands(status, page, size){
    let conn = await con.getConnection();
@@ -84,8 +83,9 @@ async function updateCommandStatus(id, status) {
 }
 
 async function insertItems(items, commande_id){
+   let montanttotal=-1;
    if(items!=null && commande_id!=null){
-      items.forEach(async (item)=>{
+      for(const item of items){
 
          let uri=item.uri;
          let libelle, montant;
@@ -98,23 +98,25 @@ async function insertItems(items, commande_id){
 
             libelle=response.data.sandwich.nom;
             montant=response.data.sandwich.prix;
-            
+            montanttotal+= montant*quantite;
             let conn = await con.getConnection();
             await conn.query("INSERT INTO item(uri, libelle, tarif, quantite, command_id) VALUES(?, ?, ?, ?, ?)",[uri, libelle, montant, quantite, commande_id]);
             conn.end();
          }catch(error){
             console.log(error);
          }
-      });
+      }
    }
+   return montanttotal;
 }
 
 async function insertCommand(body) {
-    if(body!=null && body.nom!=null && body.mail!=null && body.date!=null && body.items!=null)
+    if(body!=null && body.nom!=null && body.mail!=null && body.livraison!=null&& body.livraison.date!=null&& body.livraison.heure!=null && body.items!=null)
     {
         let nom=body.nom;
         let mail=body.mail;
-        let livraison=body.date;
+        let livraison=body.livraison.date+" "+body.livraison.heure;
+        console.log("livraison:", livraison);
         let id= uuid.v4();
         let items=body.items;
 
@@ -131,7 +133,12 @@ async function insertCommand(body) {
         let result = await conn.query("INSERT INTO commande(id, nom, mail, livraison, token, montant) VALUES(?, ?, ?, ?, ?, ?)",[id, nom, mail, livraison, token, montant]);
         conn.end();
         if(result.affectedRows>0) {
-           await insertItems(items, id);
+           montant = await insertItems(items, id);
+            console.log("montant:", montant);
+           let conn = await con.getConnection();
+           await conn.query("UPDATE commande SET montant=? WHERE id=?",[montant, id]);
+           conn.end();
+
            return await getCommand(id);
         }
         else
@@ -152,9 +159,9 @@ router.get('/', async (req, res)=>{
        count: commandes.length,
        commandes: commandes
     });
- });
+});
  
- router.get('/:id', async (req, res)=>{
+router.get('/:id', async (req, res)=>{
     let commande = await getCommandByToken(req.params.id, (req.query.token)?req.query.token:req.header('X-lbs-token'));
     if(commande) {
       let items = await getCommandItems(commande.id);
@@ -179,7 +186,7 @@ router.get('/', async (req, res)=>{
       res.status(404).send("Commande introuvable");
 });
 
- router.put("/:id/:status", async (req, res)=>{
+router.put("/:id/:status", async (req, res)=>{
     let success = await updateCommandStatus(req.params.id, Number.parseInt(req.params.status));
     if(success)
        res.status(202).send("Status de la commande modifié");
@@ -191,13 +198,16 @@ router.post('/', async (req, res)=>{
     let commande = await insertCommand(req.body);
     if(commande)
     {
-      let items;// = await getCommandItems(commande.id);
-      res.status(201).setHeader("Location", req.headers.host+"/commandes/"+commande.id).json({
+      let items = await getCommandItems(commande.id);
+      res.status(201).setHeader("Location", /*req.headers.host+*/"/commandes/"+commande.id).json({
          type: "ressource",
          commande: {
             nom: commande.nom,
             mail: commande.mail,
-            livraison: commande.livraison,
+            livraison: {
+               date: new Date(commande.livraison).toDateString(),
+               heure: new Date(commande.livraison).toTimeString()
+            },
             id: commande.id,
             token: commande.token,
             items: items,
@@ -209,4 +219,4 @@ router.post('/', async (req, res)=>{
       res.status(404).send("Opération impossible");
 });
 
- module.exports = router;
+module.exports = router;
